@@ -12,7 +12,7 @@ object ChillBuild extends Build {
 
   val sharedSettings = Project.defaultSettings ++ mimaDefaultSettings ++ Seq(
 
-    version := "0.3.5",
+    version := "0.3.6-SNAPSHOT",
     organization := "com.twitter",
     scalaVersion := "2.9.3",
     crossScalaVersions := Seq("2.9.3", "2.10.3"),
@@ -36,15 +36,15 @@ object ChillBuild extends Build {
 
     // Publishing options:
     publishMavenStyle := true,
-    publishTo <<= version { v =>
-      Some(
-        if (v.trim.toUpperCase.endsWith("SNAPSHOT"))
-          Opts.resolver.sonatypeSnapshots
-        else
-          Opts.resolver.sonatypeStaging
-          //"twttr" at "http://artifactory.local.twitter.com/libs-releases-local"
-      )
+    publishTo <<= version { (v: String) =>
+      val tresata = "http://server01:8080/archiva/repository/"
+      if (v.trim.endsWith("SNAPSHOT"))
+        Some("tresata-snapshots" at tresata + "snapshots")
+      else
+        Some("tresata-releases"  at tresata + "internal")
     },
+    credentials += Credentials(Path.userHome / ".m2" / "credentials_internal"),
+    credentials += Credentials(Path.userHome / ".m2" / "credentials_snapshots"),
     publishArtifact in Test := false,
     pomIncludeRepository := { x => false },
     pomExtra := (
