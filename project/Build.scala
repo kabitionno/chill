@@ -12,7 +12,7 @@ object ChillBuild extends Build {
 
   val sharedSettings = Project.defaultSettings ++ mimaDefaultSettings ++ Seq(
 
-    version := "0.3.6rc1-tres",
+    version := "0.3.6-tres-SNAPSHOT",
     organization := "com.twitter",
     scalaVersion := "2.9.3",
     crossScalaVersions := Seq("2.9.3", "2.10.3"),
@@ -92,8 +92,9 @@ object ChillBuild extends Build {
     chillHadoop,
     chillThrift,
     chillProtobuf,
-    chillAkka
-  )
+    chillAkka,
+    chillAvro
+    )
 
   /**
     * This returns the youngest jar we released that is compatible
@@ -107,7 +108,7 @@ object ChillBuild extends Build {
       .filterNot(unreleasedModules.contains(_))
       .map { s =>
       val suffix = if (javaOnly.contains(s)) "" else "_2.9.3"
-      "com.twitter" % ("chill-" + s + suffix) % "0.3.4"
+      "com.twitter" % ("chill-" + s + suffix) % "0.3.6"
     }
 
   def module(name: String) = {
@@ -126,10 +127,7 @@ object ChillBuild extends Build {
     settings = sharedSettings
   ).settings(
     name := "chill",
-    previousArtifact := Some("com.twitter" % "chill_2.9.3" % "0.3.3"),
-    libraryDependencies ++= Seq(
-      "org.ow2.asm" % "asm-commons" % "4.0"
-    )
+    previousArtifact := Some("com.twitter" % "chill_2.9.3" % "0.3.3")
   ).dependsOn(chillJava)
 
   def isScala210x(scalaVersion: String) = scalaVersion match {
@@ -140,7 +138,7 @@ object ChillBuild extends Build {
       case false => Seq()
       case true => Seq(
       "com.typesafe" % "config" % "0.3.1",
-      "com.typesafe.akka" %% "akka-actor" % "2.1.4"
+      "com.typesafe.akka" %% "akka-actor" % "2.2.1"
     )
   }
   lazy val chillAkka = module("akka").settings(
@@ -153,7 +151,7 @@ object ChillBuild extends Build {
 
   lazy val chillBijection = module("bijection").settings(
     libraryDependencies ++= Seq(
-      "com.twitter" %% "bijection-core" % "0.5.2"
+      "com.twitter" %% "bijection-core" % "0.6.2"
     )
   ).dependsOn(chill % "test->test;compile->compile")
 
@@ -202,4 +200,12 @@ object ChillBuild extends Build {
       "com.google.protobuf" % "protobuf-java" % "2.3.0" % "provided"
     )
   ).dependsOn(chillJava)
+
+  lazy val chillAvro = module("avro").settings(
+    crossPaths := false,
+    autoScalaLibrary := false,
+    libraryDependencies ++= Seq(
+      "com.twitter" %% "bijection-avro" % "0.6.2"
+    )
+  ).dependsOn(chill,chillJava, chillBijection)
 }
