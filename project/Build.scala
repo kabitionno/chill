@@ -26,6 +26,10 @@ object ChillBuild extends Build {
       Opts.resolver.sonatypeSnapshots,
       Opts.resolver.sonatypeReleases
     ),
+    resolvers ++= Seq(
+      "tresata-snapshots" at "http://server01:8080/archiva/repository/snapshots",
+      "tresata-releases" at "http://server01:8080/archiva/repository/internal"
+    ),
     libraryDependencies ++= Seq(
       "org.scalacheck" %% "scalacheck" % "1.10.0" % "test",
       "org.scala-tools.testing" %% "specs" % "1.6.9" % "test",
@@ -93,7 +97,8 @@ object ChillBuild extends Build {
     chillThrift,
     chillProtobuf,
     chillAkka,
-    chillAvro
+    chillAvro,
+    chillAlgebird
     )
 
   /**
@@ -208,4 +213,10 @@ object ChillBuild extends Build {
       "com.twitter" %% "bijection-avro" % "0.6.2"
     )
   ).dependsOn(chill,chillJava, chillBijection)
+
+  lazy val chillAlgebird = module("algebird").settings(
+    libraryDependencies ++= Seq(
+      "com.twitter" %% "algebird-core" % "0.5.0-tres-SNAPSHOT"
+    )
+  ).dependsOn(chill)
 }
